@@ -19,8 +19,8 @@ Version 0.1.0 has not been run on an ESP32 yet; a photo of the test board and th
 What is verified:
 
 - 16 host test programs with 84981 checks pass on Windows with `zig cc`; CI runs them on Linux with AddressSanitizer and UndefinedBehaviorSanitizer and on macOS. They cover every decoder against reference CRCs of generated test files (29 files), a fuzz pass with 200 mutated copies of each file, gapless joins of FLAC and MP3, CUE splitting, resampling, the DSP chain, tag reading for ID3, APE, Vorbis comments, RIFF, AIFF, DSF, DFF, WavPack and MP4, the library index on 5000 generated files, the queue and the resume files.
-- The ESP-IDF examples build for the ESP32 with ESP-IDF 6.1 without warnings, the I2S example also for the ESP32-S3.
-- The Arduino examples build with the Arduino core 3.3.12 (ESP-IDF 5.5) with `-Wall -Wextra` and no warnings. The SD-to-I2S sketch takes 613 KB of flash and 25.8 KB of static RAM.
+- CI builds the ESP-IDF examples for the ESP32 with ESP-IDF 5.3, 5.5, 6.0 and 6.1, and the I2S example also for the ESP32-S3. Warnings in the library fail the build.
+- CI builds the Arduino examples with the Arduino core 3.1.3 (ESP-IDF 5.3) and the latest core, and with PlatformIO. With the core 3.3.12 the SD-to-I2S sketch takes 613 KB of flash and 25.8 KB of static RAM.
 
 ## Comparison
 
@@ -77,7 +77,7 @@ PlatformIO (`platformio.ini`):
 lib_deps = https://github.com/olerast67/esp32-audio-player.git#v0.1.0
 ```
 
-Arduino IDE with the ESP32 core 3.3: download `esp32-audio-player-0.1.0.zip` from [Releases](https://github.com/olerast67/esp32-audio-player/releases) and add it with Sketch > Include Library > Add .ZIP Library. For Bluetooth output also install [esp32-a2dp-xq](https://github.com/olerast67/esp32-a2dp-xq).
+Arduino IDE with the ESP32 core 3.1 or newer: download `esp32-audio-player-0.1.0.zip` from [Releases](https://github.com/olerast67/esp32-audio-player/releases) and add it with Sketch > Include Library > Add .ZIP Library. For Bluetooth output also install [esp32-a2dp-xq](https://github.com/olerast67/esp32-a2dp-xq).
 
 A board with PSRAM (ESP32-WROVER, ESP32-S3 N8R2 or N16R8) is recommended. Decoder state, read buffers and the 200 ms output FIFO go to PSRAM when it is present; without PSRAM the FIFO takes 100 ms at up to 48 kHz (38 KB of internal RAM).
 

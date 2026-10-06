@@ -9,7 +9,7 @@ All notable changes to this project are documented here. The format follows
 ## [0.1.0] - 2026-10-06
 
 First public release. Not yet tested on ESP32 hardware: the host tests pass and the examples build
-with ESP-IDF 6.1 and the Arduino core 3.3.12.
+with ESP-IDF 5.3, 5.5, 6.0, 6.1 and the Arduino core 3.1.3 and newer.
 
 ### Added
 

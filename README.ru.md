@@ -19,8 +19,8 @@
 Что проверено:
 
 - 16 тестовых программ на компьютере с 84981 проверкой проходят на Windows с `zig cc`, в CI они идут на Linux с AddressSanitizer и UndefinedBehaviorSanitizer и на macOS. Тесты сверяют каждый декодер с эталонными CRC 29 сгенерированных файлов, гоняют фаззинг по 200 испорченных копий каждого файла, проверяют стыки FLAC и MP3 без пауз, нарезку по CUE, передискретизацию, цепочку DSP, чтение тегов ID3, APE, Vorbis comments, RIFF, AIFF, DSF, DFF, WavPack и MP4, индекс фонотеки на 5000 сгенерированных файлов, очередь и файлы продолжения.
-- Примеры для ESP-IDF собираются под ESP32 на ESP-IDF 6.1 без предупреждений, пример с I2S также под ESP32-S3.
-- Примеры для Arduino собираются на ядре Arduino 3.3.12 (ESP-IDF 5.5) с `-Wall -Wextra` без предупреждений. Скетч SD-карта в I2S занимает 613 КБ флеш-памяти и 25,8 КБ статической RAM.
+- CI собирает примеры для ESP-IDF под ESP32 на ESP-IDF 5.3, 5.5, 6.0 и 6.1, пример с I2S также под ESP32-S3. Предупреждение в коде библиотеки останавливает сборку.
+- CI собирает примеры для Arduino на ядре 3.1.3 (ESP-IDF 5.3) и на последнем ядре, а также через PlatformIO. На ядре 3.3.12 скетч SD-карта в I2S занимает 613 КБ флеш-памяти и 25,8 КБ статической RAM.
 
 ## Сравнение
 
@@ -77,7 +77,7 @@ PlatformIO (`platformio.ini`):
 lib_deps = https://github.com/olerast67/esp32-audio-player.git#v0.1.0
 ```
 
-Arduino IDE с ядром ESP32 3.3: скачайте `esp32-audio-player-0.1.0.zip` со страницы [Releases](https://github.com/olerast67/esp32-audio-player/releases) и добавьте через «Скетч > Подключить библиотеку > Добавить .ZIP библиотеку». Для вывода в Bluetooth установите ещё [esp32-a2dp-xq](https://github.com/olerast67/esp32-a2dp-xq).
+Arduino IDE с ядром ESP32 3.1 и новее: скачайте `esp32-audio-player-0.1.0.zip` со страницы [Releases](https://github.com/olerast67/esp32-audio-player/releases) и добавьте через «Скетч > Подключить библиотеку > Добавить .ZIP библиотеку». Для вывода в Bluetooth установите ещё [esp32-a2dp-xq](https://github.com/olerast67/esp32-a2dp-xq).
 
 Я рекомендую плату с PSRAM (ESP32-WROVER, ESP32-S3 N8R2 или N16R8). Состояние декодеров, буферы чтения и выходной буфер на 200 мс уходят в PSRAM, если она есть; без PSRAM выходной буфер рассчитан на 100 мс при частоте до 48 кГц (38 КБ внутренней RAM).
 
