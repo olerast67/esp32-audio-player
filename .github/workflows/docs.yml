@@ -3,7 +3,6 @@ name: API reference
 on:
   push:
     branches: [main]
-    tags: ["v*.*.*"]
   workflow_dispatch:
 
 permissions:
