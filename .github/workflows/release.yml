@@ -1,0 +1,56 @@
+name: Release
+
+# Push a tag "vX.Y.Z" after updating the version in idf_component.yml, library.properties,
+# library.json and src/audio_player/version.h, and the CHANGELOG.md section of that version.
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check that every manifest has the tag's version
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          grep -q "^version: \"$v\"" idf_component.yml || { echo "idf_component.yml"; exit 1; }
+          grep -q "^version=$v$" library.properties || { echo "library.properties"; exit 1; }
+          grep -q "\"version\": \"$v\"" library.json || { echo "library.json"; exit 1; }
+          grep -q "AUDIO_PLAYER_VERSION_STRING \"$v\"" src/audio_player/version.h || { echo "src/audio_player/version.h"; exit 1; }
+          grep -q "^## \[$v\]" CHANGELOG.md || { echo "CHANGELOG.md has no section for $v"; exit 1; }
+
+      - name: Release notes from CHANGELOG.md
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          awk -v v="$v" 'index($0, "## [" v "]") == 1 {on=1; next} on && /^## / {exit} on && /^\[/ {exit} on {print}' CHANGELOG.md > notes.md
+          cat notes.md
+
+      - name: Arduino library archive
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          mkdir -p dist/esp32-audio-player
+          cp -r library.properties library.json LICENSE NOTICE README.md README.ru.md CHANGELOG.md src examples dist/esp32-audio-player/
+          (cd dist && zip -qr "esp32-audio-player-$v.zip" esp32-audio-player)
+
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          gh release create "$GITHUB_REF_NAME" "dist/esp32-audio-player-$v.zip" --title "esp32-audio-player $v" --notes-file notes.md
+
+      - name: ESP Component Registry
+        env:
+          IDF_COMPONENT_API_TOKEN: ${{ secrets.IDF_COMPONENT_API_TOKEN }}
+        run: |
+          if [ -z "$IDF_COMPONENT_API_TOKEN" ]; then
+            echo "::warning::IDF_COMPONENT_API_TOKEN is not set: the component was not uploaded"
+            exit 0
+          fi
+          pip install idf-component-manager
+          compote component upload --namespace olerast67 --name esp32-audio-player --version "${GITHUB_REF_NAME#v}"

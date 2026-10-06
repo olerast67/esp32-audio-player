@@ -1,0 +1,13 @@
+* text=auto eol=lf
+*.png binary
+*.gif binary
+*.flac binary
+*.mp3 binary
+*.ogg binary
+*.wav binary
+*.aiff binary
+*.aifc binary
+*.dsf binary
+*.dff binary
+*.cmd text eol=crlf
+test/data/** binary

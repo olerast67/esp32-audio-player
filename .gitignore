@@ -1,0 +1,14 @@
+build/
+build-*/
+managed_components/
+dependencies.lock
+sdkconfig
+sdkconfig.old
+.pio/
+.vscode/
+.idea/
+*.o
+*.obj
+*.exe
+docs/api/
+__pycache__/

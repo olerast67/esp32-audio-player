@@ -1,0 +1,16 @@
+name: Feature request
+description: Something the library should do
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What you need
+      description: The task you want to solve and why the current API does not cover it.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: API or behaviour you have in mind, if any.

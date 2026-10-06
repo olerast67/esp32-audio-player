@@ -1,0 +1,30 @@
+{
+  "name": "esp32-audio-player",
+  "version": "0.1.0",
+  "description": "Complete audio player engine for ESP32: FLAC, MP3, Ogg Vorbis, WAV, AIFF, DSF/DFF (DoP), sample-exact gapless, CUE, ReplayGain, 10-band parametric EQ with AutoEQ import, crossfeed, limiter, resampler, queue, resume; I2S DAC and Bluetooth output",
+  "keywords": "audio, player, flac, mp3, vorbis, wav, dsd, gapless, equalizer, autoeq, i2s, dac, esp32",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/olerast67/esp32-audio-player.git"
+  },
+  "homepage": "https://github.com/olerast67/esp32-audio-player",
+  "authors": [
+    {
+      "name": "olerast67",
+      "url": "https://github.com/olerast67",
+      "maintainer": true
+    }
+  ],
+  "license": "Apache-2.0",
+  "frameworks": ["arduino"],
+  "platforms": ["espressif32"],
+  "headers": ["audio_player.h"],
+  "export": {
+    "exclude": ["test", "tools", "docs", ".github", "cmake", "examples/idf"]
+  },
+  "build": {
+    "srcDir": "src",
+    "includeDir": "src",
+    "flags": ["-O2"]
+  }
+}

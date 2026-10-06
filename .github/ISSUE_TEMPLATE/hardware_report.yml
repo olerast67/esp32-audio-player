@@ -1,0 +1,33 @@
+name: Hardware test report
+description: Tell which hardware esp32-audio-player works or fails on
+labels: [hardware-report]
+body:
+  - type: input
+    id: hardware
+    attributes:
+      label: Hardware
+      description: Board, PSRAM, DAC or Bluetooth headphones model, board and PSRAM size.
+    validations:
+      required: true
+  - type: input
+    id: framework
+    attributes:
+      label: Framework and version
+      placeholder: "ESP-IDF 6.1, or Arduino core 3.3.12"
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - Works
+        - Works with problems
+        - Does not work
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details and log
+      render: text

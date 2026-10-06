@@ -1,0 +1,25 @@
+# Doxygen configuration of the API reference published to GitHub Pages (.github/workflows/docs.yml).
+PROJECT_NAME           = esp32-audio-player
+PROJECT_NUMBER         = 0.1.0
+PROJECT_BRIEF          = "Audio player engine for ESP32"
+OUTPUT_DIRECTORY       = docs/api
+INPUT                  = README.md src/audio_player.h src/audio_player
+FILE_PATTERNS          = *.h
+RECURSIVE              = NO
+USE_MDFILE_AS_MAINPAGE = README.md
+IMAGE_PATH             = docs
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+OPTIMIZE_OUTPUT_FOR_C  = YES
+MARKDOWN_SUPPORT       = YES
+JAVADOC_AUTOBRIEF      = YES
+TYPEDEF_HIDES_STRUCT   = YES
+MACRO_EXPANSION        = YES
+PREDEFINED             = ESP_PLATFORM __attribute__(x)=
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+GENERATE_TREEVIEW      = YES
+HTML_COLORSTYLE        = AUTO_LIGHT
+SOURCE_BROWSER         = NO
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO

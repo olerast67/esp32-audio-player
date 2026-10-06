@@ -1,0 +1,134 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  host-tests:
+    name: Host tests (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux, ASan + UBSan
+            os: ubuntu-latest
+            cmake_args: -DAUDIO_PLAYER_SANITIZE=ON -DCMAKE_BUILD_TYPE=Debug
+          - name: Linux, release
+            os: ubuntu-latest
+            cmake_args: -DCMAKE_BUILD_TYPE=Release
+          - name: macOS
+            os: macos-latest
+            cmake_args: -DCMAKE_BUILD_TYPE=Release
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S test -B build/test ${{ matrix.cmake_args }} -DCMAKE_C_FLAGS=-Werror
+      - name: Build
+        run: cmake --build build/test --parallel
+      - name: Test
+        run: ctest --test-dir build/test --output-on-failure --parallel 4
+
+  source-checks:
+    name: License headers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Every source file starts with an SPDX line
+        run: |
+          bad=0
+          for f in $(git ls-files 'src/*.c' 'src/*.h' 'test/*.c' 'test/*.h' 'tools/*.c' 'examples/*.c' 'examples/*.ino' | grep -v '^src/third_party/'); do
+            head -1 "$f" | grep -q 'SPDX-License-Identifier: Apache-2.0' || { echo "missing SPDX line: $f"; bad=1; }
+          done
+          exit $bad
+
+  esp-idf:
+    name: ESP-IDF ${{ matrix.idf }} ${{ matrix.target }} ${{ matrix.example }}
+    runs-on: ubuntu-latest
+    container: espressif/idf:${{ matrix.idf }}
+    strategy:
+      fail-fast: false
+      matrix:
+        idf: [release-v5.3, release-v5.5, release-v6.0, release-v6.1]
+        target: [esp32]
+        example: [sd_i2s_player, bluetooth_headphones]
+        include:
+          - idf: release-v6.1
+            target: esp32s3
+            example: sd_i2s_player
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: esp32-audio-player
+      - uses: actions/checkout@v4
+        with:
+          repository: olerast67/esp32-a2dp-xq
+          path: esp32-a2dp-xq
+      - name: Build against the a2dp-xq checkout
+        shell: bash
+        run: |
+          manifest=esp32-audio-player/examples/idf/${{ matrix.example }}/main/idf_component.yml
+          if grep -q 'olerast67/esp32-a2dp-xq' "$manifest"; then
+            sed -i 's#^\(  olerast67/esp32-a2dp-xq:\)#\1\n    override_path: "'"$GITHUB_WORKSPACE"'/esp32-a2dp-xq"#' "$manifest"
+          fi
+          cat "$manifest"
+      - name: Build
+        shell: bash
+        run: |
+          . $IDF_PATH/export.sh
+          cd esp32-audio-player/examples/idf/${{ matrix.example }}
+          idf.py set-target ${{ matrix.target }}
+          idf.py build 2>&1 | tee build.log
+          ! grep -E "warning:" build.log | grep -E "esp32-audio-player|esp32-a2dp-xq|/main/"
+
+  arduino:
+    name: Arduino ${{ matrix.core }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        core: ["3.1.3", "latest"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/compile-sketches@v1
+        with:
+          fqbn: esp32:esp32:esp32:PartitionScheme=huge_app
+          platforms: |
+            - name: esp32:esp32
+              source-url: https://espressif.github.io/arduino-esp32/package_esp32_index.json
+              version: ${{ matrix.core }}
+          libraries: |
+            - source-path: ./
+            - source-url: https://github.com/olerast67/esp32-a2dp-xq.git
+          sketch-paths: |
+            - examples/arduino
+          cli-compile-flags: |
+            - --warnings
+            - all
+
+  platformio:
+    name: PlatformIO
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: olerast67/esp32-a2dp-xq
+          path: a2dp
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install platformio
+      - name: Build the Arduino examples
+        run: |
+          for sketch in examples/arduino/*/*.ino; do
+            pio ci "$sketch" --lib . --lib a2dp --board esp32dev \
+              -O "platform=https://github.com/pioarduino/platform-espressif32/releases/download/stable/platform-espressif32.zip" \
+              -O "board_build.partitions=huge_app.csv" -O "build_flags=-Wall -Wextra"
+          done

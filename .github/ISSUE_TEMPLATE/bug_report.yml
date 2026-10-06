@@ -1,0 +1,44 @@
+name: Bug report
+description: Something does not work as described
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Library version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: framework
+    attributes:
+      label: Framework and version
+      placeholder: "ESP-IDF 6.1, or Arduino core 3.3.12"
+    validations:
+      required: true
+  - type: input
+    id: hardware
+    attributes:
+      label: Hardware
+      description: Board, PSRAM, DAC or Bluetooth headphones model, board and PSRAM size.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: Serial monitor output around the problem.
+      render: text
+  - type: textarea
+    id: code
+    attributes:
+      label: Code to reproduce
+      description: The smallest sketch or app_main that shows the problem.
+      render: c

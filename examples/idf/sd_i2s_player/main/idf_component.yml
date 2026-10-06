@@ -1,0 +1,7 @@
+dependencies:
+  idf: ">=5.3"
+  olerast67/esp32-audio-player:
+    version: "*"
+    # Inside the repository the example builds against the local copy. Delete this line when
+    # you copy the example out: the component then comes from the ESP Component Registry.
+    override_path: "../../../../"

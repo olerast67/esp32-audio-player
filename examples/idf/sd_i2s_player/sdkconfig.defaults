@@ -1,0 +1,8 @@
+# PSRAM holds the decoder state and the output FIFO; boards without it still boot.
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_IGNORE_NOTFOUND=y
+# Long UTF-8 file names on the SD card.
+CONFIG_FATFS_LFN_HEAP=y
+CONFIG_FATFS_API_ENCODING_UTF_8=y
+CONFIG_FATFS_MAX_LFN=255
+CONFIG_FREERTOS_HZ=1000
