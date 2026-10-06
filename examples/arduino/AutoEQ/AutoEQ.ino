@@ -34,7 +34,7 @@ void printEq() {
 
 void setup() {
   Serial.begin(115200);
-  if (!SD.begin(SD_CS)) {
+  if (!SD.begin(SD_CS, SPI, 20000000)) {
     Serial.println("no SD card");
     return;
   }
@@ -45,6 +45,10 @@ void setup() {
   audio_player_esp32_config_t cfg = AUDIO_PLAYER_ESP32_CONFIG_DEFAULT();
   cfg.sink = audio_i2s_sink_create(&i2s);
   player = audio_player_start(&cfg);
+  if (!player) {
+    Serial.println("player start failed");
+    return;
+  }
 
   dsp_config_defaults(&dsp);
   if (loadAutoEq("/eq.txt", &dsp.eq)) {

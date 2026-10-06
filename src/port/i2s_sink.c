@@ -622,10 +622,18 @@ static void op_close(audio_sink_t *s) {
 // ------------------------------------------------------------------ public ----
 
 // FIFO for fifo_ms at the highest rate, smaller when memory is short, none as the last resort.
+// Without PSRAM it would come from internal RAM, which decoders, Bluetooth and Wi-Fi need: then
+// it is sized for 100 ms at 48 kHz at most (38 KB); higher rates get a proportionally shorter
+// FIFO through the limit set at open().
 static void fifo_create(i2s_out_t *w) {
     w->fifo_ms = w->cfg.fifo_ms ? w->cfg.fifo_ms : DEFAULT_FIFO_MS;
+    uint32_t size_rate = w->max_rate;
+    if (heap_caps_get_total_size(MALLOC_CAP_SPIRAM) == 0) {
+        if (size_rate > 48000u) size_rate = 48000u;
+        if (w->fifo_ms > 100u) w->fifo_ms = 100u;
+    }
     for (uint32_t ms = w->fifo_ms; ms >= FIFO_MIN_MS; ms /= 2) {
-        uint32_t frames = ap_i2s_fifo_frames_for_ms(w->max_rate, ms);
+        uint32_t frames = ap_i2s_fifo_frames_for_ms(size_rate, ms);
         if (ap_i2s_fifo_init(&w->fifo, frames) == CORE_OK) {
             if (ms < w->fifo_ms)
                 ESP_LOGW(TAG, "memory short: %u ms output FIFO instead of %u", (unsigned)ms, (unsigned)w->fifo_ms);

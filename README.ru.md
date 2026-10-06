@@ -79,7 +79,7 @@ lib_deps = https://github.com/olerast67/esp32-audio-player.git#v0.1.0
 
 Arduino IDE с ядром ESP32 3.3: скачайте `esp32-audio-player-0.1.0.zip` со страницы [Releases](https://github.com/olerast67/esp32-audio-player/releases) и добавьте через «Скетч > Подключить библиотеку > Добавить .ZIP библиотеку». Для вывода в Bluetooth установите ещё [esp32-a2dp-xq](https://github.com/olerast67/esp32-a2dp-xq).
 
-Я рекомендую плату с PSRAM (ESP32-WROVER, ESP32-S3 N8R2 или N16R8). Состояние декодеров, буферы чтения и выходной буфер на 200 мс уходят в PSRAM, если она есть; без PSRAM выходной буфер уменьшается до размера, который помещается в память.
+Я рекомендую плату с PSRAM (ESP32-WROVER, ESP32-S3 N8R2 или N16R8). Состояние декодеров, буферы чтения и выходной буфер на 200 мс уходят в PSRAM, если она есть; без PSRAM выходной буфер рассчитан на 100 мс при частоте до 48 кГц (38 КБ внутренней RAM).
 
 ## Возможности
 

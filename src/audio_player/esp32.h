@@ -35,7 +35,8 @@ typedef struct {
     float volume_default_db;      ///< first volume when there is no saved state
     float volume_max_db;          ///< upper volume limit (hearing protection), <= 0
     float volume_step_db;         ///< player_cmd_volume_step() increment
-    uint32_t task_stack;          ///< bytes of internal RAM for the audio task
+    uint32_t task_stack;          ///< bytes of internal RAM for the audio task; the MP3 decoder alone
+                                  ///< takes about 16 KB of it per frame (minimp3 scratch)
     uint8_t task_priority;        ///< FreeRTOS priority of the audio task
     int8_t task_core;             ///< core to pin the audio task to, -1 = any
     core_event_sink_t on_event;   ///< optional: player events (called from the audio task)
@@ -47,14 +48,16 @@ typedef struct {
 #define AUDIO_PLAYER_ESP32_CONFIG_DEFAULT()                                                                   \
     {                                                                                                         \
         .sink = NULL, .library = NULL, .state_dir = NULL, .scrobble_log = false, .volume_default_db = -20.0f, \
-        .volume_max_db = 0.0f, .volume_step_db = 1.0f, .task_stack = 12288, .task_priority = 18,              \
+        .volume_max_db = 0.0f, .volume_step_db = 1.0f, .task_stack = 24576, .task_priority = 18,              \
         .task_core = 1, .on_event = NULL, .on_event_user = NULL, .log_level = CORE_LOG_INFO,                  \
     }
 
 /// Initialise the port, create the player and start its audio task. NULL on failure.
 /// With state_dir set, call player_restore_state() next to continue where the last session ended.
 player_t *audio_player_start(const audio_player_esp32_config_t *cfg);
-/// Stop the audio task and destroy the player. The sink stays: destroy it afterwards.
+/// Stop the audio task and destroy the player. The sink stays: destroy it afterwards. Not from
+/// on_event (it runs on the audio task). With Bluetooth, call a2dp_xq_deinit() first: its
+/// remote callback holds the player pointer.
 void audio_player_stop(player_t *p);
 
 #ifdef __cplusplus

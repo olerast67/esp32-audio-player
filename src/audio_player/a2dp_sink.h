@@ -12,6 +12,9 @@
 ///   bt.remote_user = player;                   // set after audio_player_start()
 ///   a2dp_xq_init(&bt);
 ///   player_cmd_set_sink(player, audio_player_a2dp_sink());
+//
+// Shutting down: a2dp_xq_deinit() before audio_player_stop(), so no headphone button reaches a
+// player that no longer exists.
 ///
 /// The player resamples everything to 44.1 kHz for this sink and keeps its DSP output at
 /// 32 bits; the sink adds the one TPDF dither to 16 bits. Volume goes to the headphones over

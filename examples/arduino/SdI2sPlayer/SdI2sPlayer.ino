@@ -28,7 +28,7 @@ void onEvent(const core_event_t *ev, void *) {
 
 void setup() {
   Serial.begin(115200);
-  if (!SD.begin(SD_CS)) {  // mounted at /sd
+  if (!SD.begin(SD_CS, SPI, 20000000)) {  // mounted at /sd; 20 MHz SPI for hi-res FLAC
     Serial.println("no SD card");
     return;
   }
@@ -45,6 +45,10 @@ void setup() {
   cfg.state_dir = "/sd/.player";  // queue, position and volume survive a reset
   cfg.on_event = onEvent;
   player = audio_player_start(&cfg);
+  if (!player) {
+    Serial.println("player start failed");
+    return;
+  }
 
   if (player_restore_state(player, true) != CORE_OK) {
     player_cmd_play_folder(player, "/sd/music", 0, false);

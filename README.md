@@ -79,7 +79,7 @@ lib_deps = https://github.com/olerast67/esp32-audio-player.git#v0.1.0
 
 Arduino IDE with the ESP32 core 3.3: download `esp32-audio-player-0.1.0.zip` from [Releases](https://github.com/olerast67/esp32-audio-player/releases) and add it with Sketch > Include Library > Add .ZIP Library. For Bluetooth output also install [esp32-a2dp-xq](https://github.com/olerast67/esp32-a2dp-xq).
 
-A board with PSRAM (ESP32-WROVER, ESP32-S3 N8R2 or N16R8) is recommended. Decoder state, read buffers and the 200 ms output FIFO go to PSRAM when it is present; without PSRAM the FIFO shrinks to what fits.
+A board with PSRAM (ESP32-WROVER, ESP32-S3 N8R2 or N16R8) is recommended. Decoder state, read buffers and the 200 ms output FIFO go to PSRAM when it is present; without PSRAM the FIFO takes 100 ms at up to 48 kHz (38 KB of internal RAM).
 
 ## Features
 

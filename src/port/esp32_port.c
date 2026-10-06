@@ -77,13 +77,25 @@ static void wake_cb(void *user) {
     xSemaphoreGive(r->wake);
 }
 
+// The sink write normally blocks and paces the loop. A sink that never blocks, or a long run of
+// work without output (skipping through a file, many files that fail to open), would keep this
+// task busy; it yields a tick every YIELD_EVERY_US so the idle task and the watchdog get time.
+#define YIELD_EVERY_US 50000
+
 static void audio_task(void *arg) {
     runner_t *r = (runner_t *)arg;
+    int64_t last_yield = esp_timer_get_time();
     while (!r->quit) {
         int32_t n = player_run_once(r->player);
-        if (n > 0) continue;  // the sink write paces the loop
-        uint32_t ms = player_wait_hint_ms(r->player);
-        if (ms) xSemaphoreTake(r->wake, pdMS_TO_TICKS(ms) + 1);
+        uint32_t ms = n > 0 ? 0 : player_wait_hint_ms(r->player);
+        int64_t now = esp_timer_get_time();
+        if (ms) {
+            xSemaphoreTake(r->wake, pdMS_TO_TICKS(ms) + 1);
+            last_yield = now;
+        } else if (now - last_yield > YIELD_EVERY_US) {
+            vTaskDelay(1);
+            last_yield = now;
+        }
     }
     xSemaphoreGive(r->done);
     vTaskDelete(NULL);
@@ -132,7 +144,7 @@ player_t *audio_player_start(const audio_player_esp32_config_t *cfg) {
         return NULL;
     }
 
-    uint32_t stack = cfg->task_stack ? cfg->task_stack : 12288;
+    uint32_t stack = cfg->task_stack ? cfg->task_stack : 24576;
     UBaseType_t prio = cfg->task_priority ? cfg->task_priority : 18;
     BaseType_t core = tskNO_AFFINITY;
     if (cfg->task_core >= 0 && cfg->task_core < portNUM_PROCESSORS) core = cfg->task_core;
@@ -149,6 +161,10 @@ player_t *audio_player_start(const audio_player_esp32_config_t *cfg) {
 void audio_player_stop(player_t *p) {
     runner_t *r = s_runner;
     if (!r || r->player != p) return;
+    if (xTaskGetCurrentTaskHandle() == r->task) {
+        ESP_LOGE(TAG, "audio_player_stop() called from the audio task (an event callback): ignored");
+        return;
+    }
     r->quit = true;
     xSemaphoreGive(r->wake);
     xSemaphoreTake(r->done, portMAX_DELAY);

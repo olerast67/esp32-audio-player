@@ -43,7 +43,7 @@ void onPlayer(const core_event_t *ev, void *) {
 
 void setup() {
   Serial.begin(115200);
-  if (!SD.begin(SD_CS)) {
+  if (!SD.begin(SD_CS, SPI, 20000000)) {
     Serial.println("no SD card");
     return;
   }
@@ -53,6 +53,10 @@ void setup() {
   cfg.state_dir = "/sd/.player";
   cfg.on_event = onPlayer;
   player = audio_player_start(&cfg);
+  if (!player) {
+    Serial.println("player start failed");
+    return;
+  }
 
   a2dp_xq_config_t bt = A2DP_XQ_CONFIG_DEFAULT();
   bt.device_name = "ESP32 player";

@@ -46,6 +46,7 @@ static bool mount_sd(void) {
     sdspi_device_config_t slot = SDSPI_DEVICE_CONFIG_DEFAULT();
     slot.gpio_cs = PIN_SD_CS;
     slot.host_id = host.slot;
+    host.max_freq_khz = 20000;  // hi-res FLAC needs more than the 4 MHz probing clock
     esp_vfs_fat_sdmmc_mount_config_t mount = {.format_if_mount_failed = false, .max_files = 8};
     sdmmc_card_t *card;
     return esp_vfs_fat_sdspi_mount(MOUNT, &host, &slot, &mount, &card) == ESP_OK;
